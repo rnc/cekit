@@ -9,12 +9,12 @@ import shutil
 from jinja2 import Environment, FileSystemLoader
 from packaging.version import LegacyVersion, parse as parse_version
 
-from cekit import tools
+import cekit
+from cekit import tools, __version__ as cekit_version
 from cekit.config import Config
 from cekit.descriptor import Env, Image, Label, Module, Overrides, Repository
 from cekit.errors import CekitError
 from cekit.template_helper import TemplateHelper
-from cekit.version import version as cekit_version
 
 LOGGER = logging.getLogger('cekit')
 CONFIG = Config()
@@ -247,7 +247,7 @@ class Generator(object):
 
         for module in modules_to_install:
             module = self._module_registry.get_module(
-                module.name, module.version, suppress_warnings=True)
+                module.name, cekit.__version__, suppress_warnings=True)
             LOGGER.debug("Copying module '{}' required by '{}'.".format(
                 module.name, self.image.name))
 

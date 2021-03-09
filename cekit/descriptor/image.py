@@ -184,8 +184,8 @@ class Image(Descriptor):
         for override in overrides:
             if override.name:
                 self.name = override.name
-            if override.version:
-                self.version = override.version
+            if cekit.__version__:
+                self.version = cekit.__version__
             if override.base:
                 self.base = override.base
             if override.description:
@@ -335,9 +335,9 @@ class Image(Descriptor):
                 to_install.name, source.name))
             override = module_overrides.get(to_install.name, None)
             if override:
-                if override.version != to_install.version:
+                if override.version != cekit.__version__:
                     logger.debug("Module '{}:{}' being overridden with '{}:{}'.".format
-                                 (to_install.name, to_install.version, override.name, override.version))
+                                 (to_install.name, cekit.__version__, override.name, override.version))
                 # apply module override
                 to_install = override
 
@@ -345,9 +345,9 @@ class Image(Descriptor):
             # see if we've already processed this
             if existing:
                 # check for a version conflict
-                if existing.version != to_install.version:
+                if cekit.__version__ != to_install.version:
                     logger.warning("Module version inconsistency for {}: {} requested, but {} will be used.".format(
-                        to_install.name, to_install.version, existing.version))
+                        to_install.name, to_install.version, cekit.__version__))
                 continue
 
             module = module_registry.get_module(to_install.name, to_install.version)

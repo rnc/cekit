@@ -11,12 +11,12 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 from packaging.version import LegacyVersion, parse as parse_version
 
-from cekit import tools
+import cekit
+from cekit import tools, __version__ as cekit_version
 from cekit.config import Config
 from cekit.descriptor import Env, Image, Label, Module, Overrides, Repository
 from cekit.errors import CekitError
 from cekit.template_helper import TemplateHelper
-from cekit.version import version as cekit_version
 
 LOGGER = logging.getLogger('cekit')
 CONFIG = Config()
@@ -55,10 +55,13 @@ class Generator(object):
 
         if overrides:
             for override in overrides:
-                # TODO: If the overrides is provided as text, why do we try to get path to it?
                 LOGGER.debug("Loading override '{}'".format(override))
+
+                override_artifact_dir = os.path.dirname(os.path.abspath(override))
+                if not os.path.exists(override):
+                    override_artifact_dir = os.path.dirname(os.path.abspath(descriptor_path))
                 self._overrides.append(Overrides(tools.load_descriptor(
-                    override), os.path.dirname(os.path.abspath(override))))
+                    override), override_artifact_dir))
 
         LOGGER.info("Initializing image descriptor...")
 
@@ -246,7 +249,7 @@ class Generator(object):
 
         for module in modules_to_install:
             module = self._module_registry.get_module(
-                module.name, module.version, suppress_warnings=True)
+                module.name, cekit.__version__, suppress_warnings=True)
             LOGGER.debug("Copying module '{}' required by '{}'.".format(
                 module.name, self.image.name))
 

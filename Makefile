@@ -39,11 +39,13 @@ hook-gitter:
 
 release: clean
 	pip install zest.releaser
+	#git checkout develop
 	#git reset --hard upstream/develop
 	prerelease
 
+	git checkout master
 	git reset --hard upstream/master
-	git merge develop -X theirs --message
+	git merge develop -X theirs --message "Merging develop branch"
 
 	python setup.py clean
 	python setup.py sdist

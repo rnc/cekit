@@ -53,6 +53,7 @@ map:
   packages: {type: any}
   osbs: {type: any}
   volumes: {type: any}
+  extra_commands: {type: any}
   help:
     map:
       add: {type: bool}
@@ -103,6 +104,7 @@ class Image(Descriptor):
         self._descriptor["volumes"] = [
             Volume(x) for x in self._descriptor.get("volumes", [])
         ]
+        self._descriptor['extra_commands'] = self._descriptor.get('extra_commands', {})
 
         # make sure image declarations override any module definitions
         # TODO: Make into a NamedTuple to make types easier to reason about.
@@ -111,6 +113,8 @@ class Image(Descriptor):
             modules=Image._to_dict(self.modules.install),
         )
         self._all_artifacts: Dict[str, Resource] = Image._to_dict(self.artifacts)
+
+        logger.info("### extra_commands {}".format( self._descriptor['extra_commands']))
 
     def process_defaults(self):
         """Prepares default values before rendering"""
@@ -248,6 +252,14 @@ class Image(Descriptor):
     def help(self, value):
         self._descriptor["help"] = value
 
+    @property
+    def extra_commands(self):
+        return self.get('extra_commands')
+
+    @extra_commands.setter
+    def extra_commands(self, value):
+        self._descriptor['extra_commands'] = value
+
     def apply_image_overrides(self, overrides: List["Overrides"]):
         """
         Applies overrides to the image descriptor.
@@ -316,6 +328,10 @@ class Image(Descriptor):
             )
 
             self.packages._descriptor = override.packages.merge(self.packages)
+
+            if override.extra_commands:
+                logger.debug("Replacing {} with {}".format(self.extra_commands, override.extra_commands))
+                self.extra_commands = override.extra_commands
 
             # In case content sets are provided as null values
             # Remove the key entirely.

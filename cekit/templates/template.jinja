@@ -188,6 +188,7 @@ repos/{{ repo.filename }} \
  #
  # 1. Sets user to 'root'
  # 2. Adds any custom repositories
+ # 3. Runs any custom commands
  #}
 {%- macro process_image(animage) %}
     {% if animage.from != 'scratch' %}
@@ -220,6 +221,13 @@ repos/{{ repo.filename }} \
     {% endif %}
 
     {{- process_args(animage) }}
+
+    ### process_image macro 2
+    {% if animage.extra_commands %}
+    # Extra user specified commands NOT MODULE
+    {{ animage.extra_commands | indent(width=4)}}
+    {% endif -%}
+
     {% for to_install in animage.modules.install %}
 {{ process_module(helper.module(to_install), animage) }}
     {% endfor %}
